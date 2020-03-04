@@ -65,13 +65,14 @@ function addRole() {
     var departments;
     connection.query("Select id, name from department", function(err, res){
         departments  = res
-    })
+
     console.log(departments)
-    const separtmentChoices = departments.map(({id, name}) => ({
+    const departmentChoices = departments.map(({id, name}) => ({
         name: name,
         value: id
     }));
-    console.log(departmentNames)
+
+   // console.log(departmentNames)
     // var query = 'SELECT * FROM department'
     // var depts;
     // connection.query(query, function (err, res) {
@@ -96,7 +97,7 @@ function addRole() {
             {
                 name: 'departmentId',
                 message: 'Please select a department by entering the correspoding digit.',
-                choices: separtmentChoices,
+                choices: departmentChoices,
             }
         ])
         .then(function (answer) {
@@ -106,7 +107,7 @@ function addRole() {
                 {
                     title: answer.title,
                     salary: answer.salary,
-                    departmentId: answer.departmentId
+                    department_id: answer.departmentId
                 },
                 function (err) {
                     if (err) throw err;
@@ -114,37 +115,51 @@ function addRole() {
                 });
         });
 }
+    )}
 //Add a new Employee
 function addEmp() {
-    connection.query('SELECT DISTINCT roleId, title FROM role',
+    connection.query('SELECT DISTINCT role_id FROM employee',
         //var erole;      
         function (err, res) {
             if (err) throw err;
+            console.log("\n")
             console.table(res);
         }),
         inquirer
             .prompt([
                 {
-                    name: 'roleId',
+                    name: 'role_id',
                     choices: 'role',
                     message: 'Please select a role for by entering the role ID.'
                 },
                 {
-                    name: 'firstName',
+                    name: 'first_name',
                     type: 'input',
                     message: "Enter the employee's first name."
                 },
                 {
-                    name: 'lastName',
+                    name: 'last_name',
                     type: 'input',
                     message: "Enter the employee's last name."
                 },
                 {
-                    name: 'managerId',
+                    name: 'manager_id',
                     choices: 'rawlist',
                     message: "Please select a manager by entering the manager's employee ID."
                 }
-            ]);
+            ]).then(function(data){
+                console.log("------")
+                console.log(data)
+                console.log("-------")
+                connection.query(
+                    'INSERT INTO employee SET ?',data,
+                    function (err) {
+                        if (err) throw err;
+                        console.log("You have successfully added a new employee!");
+                    }
+                );
+
+            });
 }
 //Search Employees table for Managers
 function searchEmp() {
@@ -156,13 +171,14 @@ function searchEmp() {
             console.table(res);
         })
         .then(function (answer) {
+            console.log("SEARH EMPLOEE FUNCTION")
             //A new row is created in the role table 
             connection.query(
                 'INSERT INTO employees SET ?',
                 {
                     firstName: answer.firstName,
                     lastName: answer.lastName,
-                    roleId: answer.roleId,
+                    role_id: answer.roleId,
                     managerId: answer.managerId
                 },
                 function (err) {
